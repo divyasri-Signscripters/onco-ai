@@ -1,0 +1,44 @@
+import torch
+import torchvision.transforms as transforms
+from torchvision.models import vgg19
+from PIL import Image
+import numpy as np
+import os
+
+# Define Results Directory
+RESULTS_DIR = r"E:\Results"
+os.makedirs(RESULTS_DIR, exist_ok=True)
+
+# Load VGG19 Model (Pretrained)
+style_model = vgg19(pretrained=True).features[:21]  # Use early layers for texture extraction
+style_model.eval()
+
+#  Load & Transform CT Image
+transform = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.ToTensor()
+])
+
+# Generate Biopsy Image (Fixed Version)
+def generate_biopsy_image(image_path, organ_type):
+    """Generates biopsy-like images from CT scans using VGG19."""
+    image = Image.open(image_path).convert("RGB")
+    image_tensor = transform(image).unsqueeze(0)
+
+    with torch.no_grad():
+        biopsy_tensor = style_model(image_tensor)
+
+    #  Reduce from 512 channels → 3 channels (RGB) by selecting meaningful feature maps
+    biopsy_tensor = biopsy_tensor.squeeze(0)[:3, :, :]  # Take the first 3 feature maps
+
+    # Normalize Image for Proper Visualization
+    biopsy_tensor = (biopsy_tensor - biopsy_tensor.min()) / (biopsy_tensor.max() - biopsy_tensor.min())  # Normalize
+
+    biopsy_image = transforms.ToPILImage()(biopsy_tensor)
+
+    #  Save Image in Results Folder
+    biopsy_image_path = os.path.join(RESULTS_DIR, f"{organ_type}_Biopsy.png")
+    biopsy_image.save(biopsy_image_path)
+
+    print(f"Biopsy Image Saved: {biopsy_image_path}")
+    return biopsy_image_path
