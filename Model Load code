@@ -1,0 +1,39 @@
+import torch
+import torchvision.models as models
+import torch.nn as nn
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+#  Define Model Structure
+class BrainTumorClassifier(nn.Module):
+    def _init_(self, num_classes):
+        super(BrainTumorClassifier, self)._init_()
+        self.model = models.densenet121(pretrained=False)
+        self.model.classifier = nn.Linear(1024, num_classes)  # Match num_classes
+
+    def forward(self, x):
+        return self.model(x)
+
+#  Function to Automatically Detect Classes & Load Model
+def load_brain_model(model_path):
+    # Load state dict without applying to a model yet
+    model_state = torch.load(model_path, map_location=device)
+
+    # Detect number of output classes from saved weights
+    classifier_weight_shape = model_state["model.classifier.weight"].shape
+    num_classes = classifier_weight_shape[0]  # Extract number of output classes
+
+    print(f"Detected {num_classes} output classes in {model_path}")
+
+    # Create the model with the correct number of classes
+    model = BrainTumorClassifier(num_classes).to(device)
+    model.load_state_dict(model_state)  # Now load correctly
+    model.eval()
+    return model
+
+#  Load All Models
+lung_model = load_brain_model("Lung_Cancer_Model.pth")
+kidney_model = load_brain_model("Kidney_Cancer_Model.pth")
+brain_model = load_brain_model("Brain_Cancer_Model.pth")
+
+print(" All Models Loaded Successfully!")
