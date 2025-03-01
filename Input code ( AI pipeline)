@@ -1,0 +1,40 @@
+# Full AI Pipeline: From CT Scan to Biopsy & Report
+def process_ct_scan():
+    """Handles the entire workflow from CT scan input to biopsy image & report generation."""
+    
+    #  Step 1: Take User Input for Patient & Scan Details
+    patient_name = input("Enter Patient Name: ").strip()
+    patient_id = input("Enter Patient ID: ").strip()
+    patient_age = input("Enter Patient Age: ").strip()
+    patient_gender = input("Enter Patient Gender (M/F): ").strip().upper()
+    doctor_name = input("Enter Doctor's Name: ").strip()
+
+    # Step 2: CT Scan Input
+    image_path = input("Enter the path of the CT scan image: ").strip().strip('"')
+    
+    if not os.path.exists(image_path):
+        print(f"Error: File not found at {image_path}")
+        return
+
+    # Step 3: Organ Selection
+    organ_type = input("Enter the organ type (Lung, Kidney, Brain): ").capitalize()
+    
+    if organ_type not in ["Lung", "Kidney", "Brain"]:
+        print("Invalid organ type! Please enter Lung, Kidney, or Brain.")
+        return
+
+    # Step 4: Generate Biopsy Image
+    print("Generating Biopsy-Like Image...")
+    biopsy_image_path = generate_biopsy_image(image_path, organ_type)
+
+    # Step 5: Generate Histopathology Report with Patient Details
+    print("Generating Histopathology Report...")
+    report_path = generate_histopathology_report(
+        organ_type, biopsy_image_path, patient_name, patient_id, patient_age, patient_gender, doctor_name
+    )
+
+    # Final Confirmation
+    print(f"Process Complete! Biopsy Image: {biopsy_image_path}, Report: {report_path}")
+
+# Execute the Full Process
+process_ct_scan()
