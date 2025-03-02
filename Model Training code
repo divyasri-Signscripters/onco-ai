@@ -49,7 +49,7 @@ def load_brain_cancer_data(data_path, categories):
                 labels.append(label)
     return image_paths, labels
 
-#  Define Dataset Path & Categories
+#  Define Dataset Path & Categories ( here we can change for different cancer types and their categories)
 data_path = r"D:\Data sets\Brain Cancer"
 brain_categories = ["brain_glioma", "brain_menin", "brain_tumor"]
 
